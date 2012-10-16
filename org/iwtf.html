@@ -1,0 +1,3187 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>iwtf: an interactive web test framework</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="title" content="iwtf: an interactive web test framework"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-10-16 21:40:53 UTC"/>
+<meta name="author" content="Andrew Cheng"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/stylesheet.css"/>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">iwtf: an interactive web test framework</h1>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction / Rationale</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Without iwtf</a></li>
+<li><a href="#sec-1-2">1.2 With iwtf</a></li>
+<li><a href="#sec-1-3">1.3 Important Notes and Current Limitations</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Defining Web Element Locators</a>
+<ul>
+<li><a href="#sec-2-1">2.1 The Catalog</a></li>
+<li><a href="#sec-2-2">2.2 Usage</a></li>
+</ul>
+</li>
+<li><a href="#shopper_usage">3 Defining a Single Locator</a>
+<ul>
+<li><a href="#sec-3-1">3.1 Naming Conventions for Web Element Locators</a></li>
+<li><a href="#sec-3-2">3.2 Usage: When Preparing to Write New Tests</a></li>
+<li><a href="#sec-3-3">3.3 Notes About Locators</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Defining Tests</a>
+<ul>
+<li><a href="#browser_fixtures">4.1 Test Fixture: Browser</a></li>
+<li><a href="#sec-4-2">4.2 Test Fixture: Cookies</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 Running Tests</a></li>
+<li><a href="#sec-6">6 Configuration</a>
+<ul>
+<li><a href="#sec-6-1">6.1 Patience</a></li>
+<li><a href="#sec-6-2">6.2 Debug Printlns</a></li>
+</ul>
+</li>
+<li><a href="#web_api">7 Test Framework API (and Implementation)</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#sec-7-1">7.1 go (to a URL)</a></li>
+<li><a href="#sec-7-2">7.2 enter (typing text in a field)</a></li>
+<li><a href="#sec-7-3">7.3 clear</a></li>
+<li><a href="#sec-7-4">7.4 pickt (selecting from drop-down list by text)</a></li>
+<li><a href="#sec-7-5">7.5 pickv (selecting from drop-down list by value)</a></li>
+<li><a href="#sec-7-6">7.6 selected? (selecting from drop-down list by value)</a></li>
+<li><a href="#sec-7-7">7.7 check (checkbox)</a></li>
+<li><a href="#sec-7-8">7.8 click</a></li>
+<li><a href="#sec-7-9">7.9 wait for an element to be visible</a></li>
+<li><a href="#sec-7-10">7.10 getting the text of an element</a></li>
+<li><a href="#sec-7-11">7.11 getting the value of an element</a></li>
+<li><a href="#sec-7-12">7.12 getting the class of an element</a></li>
+<li><a href="#sec-7-13">7.13 testing if an element is present</a></li>
+<li><a href="#sec-7-14">7.14 waiting for a condition to be true</a></li>
+<li><a href="#sec-7-15">7.15 exiting iframes, selecting the root document</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#when_a_step_fails">8 When a Test Step Fails (Implementation)</a>
+<ul>
+<li><a href="#sec-8-1">8.1 Test Steps Wrapped in Retries</a></li>
+<li><a href="#sec-8-2">8.2 Retry vs Other Options</a></li>
+<li><a href="#sec-8-3">8.3 Redefining Element Locators</a></li>
+<li><a href="#sec-8-4">8.4 Investigating a Failure</a></li>
+</ul>
+</li>
+<li><a href="#sec-9">9 Fixing Failing Tests</a>
+<ul>
+<li><a href="#sec-9-1">9.1 Implementation</a>
+<ul>
+<li><a href="#sec-9-1-1">9.1.1 Making Attribute Checkboxes for the Dialog</a>
+<ul>
+<li><a href="#sec-9-1-1-1">9.1.1.1 Supported Attributes</a></li>
+<li><a href="#sec-9-1-1-2">9.1.1.2 Checkbox IDs</a></li>
+<li><a href="#sec-9-1-1-3">9.1.1.3 Checkbox Labels</a></li>
+<li><a href="#sec-9-1-1-4">9.1.1.4 Checkbox Selected Initially</a></li>
+<li><a href="#sec-9-1-1-5">9.1.1.5 Custom Text Field</a>
+<ul>
+<li>
+<ul>
+<li><a href="#sec-9-1-1-5-1">9.1.1.5.1 validate custom xpaths</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-9-1-2">9.1.2 Getting the Result: Name and Query</a></li>
+<li><a href="#sec-9-1-3">9.1.3 Getting the Resulting Query</a></li>
+<li><a href="#sec-9-1-4">9.1.4 Testing the Resulting Query</a></li>
+<li><a href="#sec-9-1-5">9.1.5 Handling the Name</a></li>
+<li><a href="#sec-9-1-6">9.1.6 Defining the Locator</a></li>
+<li><a href="#sec-9-1-7">9.1.7 Updating locators.clj</a>
+<ul>
+<li><a href="#sec-9-1-7-1">9.1.7.1 make location of locators.clj flexible</a></li>
+</ul>
+</li>
+<li><a href="#sec-9-1-8">9.1.8 Constructing the Dialog</a></li>
+<li><a href="#sec-9-1-9">9.1.9 Entry Point for Maintaining Tests Use Case</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-10">10 Tips and Best Practices</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction / Rationale</h2>
+<div class="outline-text-2" id="text-1">
+
+<p><code>iwtf</code> is an interactive web test framework. I created it because I
+felt the need to improve my team's experience of maintaining automated
+web tests, especially if the element locators for the web site under
+test changed frequently.
+</p>
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Without iwtf</h3>
+<div class="outline-text-3" id="text-1-1">
+
+
+<p>
+Here's the old experience: You kick off your test suite and move on to
+another task while it churns away. At some point you check on how it's
+doing and you find that there are a lot of failures and stack traces.
+Maybe the tests are still running. Or maybe they're all finished. In
+any case, all the browsers for the failed tests have closed and all
+you have to work with are stack traces and log files.
+</p>
+<p>
+Sometimes you have to run a test again and step through a debugger
+just to see what happened. Or maybe you manually recreate the test so
+that you can poke around with Firebug on the page/step in question.
+</p>
+<p>
+Often you see that many tests failed because they relied
+on the same out-of-date web element locator. Usually the number of
+fixes seem small in comparison to the number of failures and you find
+yourself iterating a loop of: run, debug, fix, compile, run&hellip; It
+starts to feel like peeling an onion one layer at a time.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> With iwtf</h3>
+<div class="outline-text-3" id="text-1-2">
+
+
+<p>
+Here's the experience with <code>iwtf</code>: you kick off your test suite and it
+churns away until the first failure to find an expected web element.
+Everything pauses and a dialog box appears which allows you to (1)
+view the <a href="#expanded-stack-trace">expanded stack trace</a> which shows all the source code
+for every function from all scopes down to the line that failed, (2)
+fiddle with the browser which is still alive, on the web page that has
+the failure, and which might even support Firebug, (3) redefine the
+web element locator in question, (4) retry the failed test step, or
+(5) skip the current test, current suite, or all remaining tests.
+</p>
+<p>
+The features of <code>iwtf</code> which help you with (3) above can also be used
+when creating tests in the first place. <code>iwtf</code> can present a catalog
+which allows you to define web element locators for the current page
+without requiring you to write much code at all.
+</p>
+<p>
+You're still dealing with many layers of an onion but now each layer
+should be easier to deal with since you're able to interact with the
+browser at the point of failure and fix issues dynamically without
+recompiling or even visiting the code directly to follow a stack trace
+or edit an element locator.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> Important Notes and Current Limitations</h3>
+<div class="outline-text-3" id="text-1-3">
+
+
+<p>
+<code>iwtf</code> is implemented as a <a name="literate-programming" class="target">literate programming</a> project. This
+means everything is communicated in a natural/human language like
+English in a sequence intended for another human to comprehend. Code
+snippets appear inline when appropriate. So all concepts and code are
+in human-order, not compiler-order. Actual code files are re-sequenced
+from these snippets for the compiler. And a formatted document for
+reading (such as this web page in HTML) is also an output. Ideally,
+any new contributor merely has to read this one document carefully to
+get up to speed.
+</p>
+<p>
+This is one of my early attempts at <a href="#literate-programming">literate programming</a> so yes, there
+are sections of code that were developed "normally" and thus aren't
+explained as thoroughly. One section that demonstrates <a href="#literate-programming">literate programming</a> is <a href="#sec-8">When a Test Step Fails (Implementation)</a>.
+</p>
+<p>
+Any time you see bold text, it's likely an anchor that gets linked to
+from elsewhere in the document. I made it bold in the HTML with a CSS
+style so that it gets your attention when you arrive after clicking a
+link.
+</p>
+<p>
+Currently only Firefox testing is supported with <code>iwtf</code>. Other browsers
+can be supported with some code changes.
+</p>
+<p>
+Here are the layers involved:
+</p><ul>
+<li>the Clojure code
+</li>
+<li>a Clojure library called <a name="clj-webdriver" class="target">clj-webdriver</a> (<a href="https://github.com/semperos/clj-webdriver">official site</a>)
+</li>
+<li><a name="Selenium" class="target">Selenium</a> <b>WebDriver</b>, a Java library  (<a href="http://seleniumhq.org/projects/webdriver/">official site</a>)
+</li>
+<li>Firefox browser
+</li>
+</ul>
+
+
+<p>
+This framework does not require you to launch a <a href="#Selenium">Selenium</a> service (like
+a remote control server or a grid hub plus nodes) separately. We have
+the <a href="#clj-webdriver">clj-webdriver</a> library launch the browser that it needs in a test
+fixture, so tests simply assume the browser is available.
+</p>
+<p>
+This currently does not support <a href="#Selenium">Selenium</a> Grid. (Popping up a dialog
+box on your machine for a browser and a failing test on some remote
+machine x seems problematic. I suppose <code>iwtf</code> could place the failing
+test in a queue, and then process the queue FIFO by restarting a
+failing test on your machine and behaving normally from there. Then
+you would have the benefit of parallized testing and having failures
+brought to your machine for interactive fixing.)
+</p>
+<p>
+Currently the <code>iwtf</code> leiningen project is a template for a testing
+project; tests exist inside the <code>iwtf</code> project (vs your project
+pulling in <code>iwtf</code> as a library/dependency). <code>iwtf</code> could be turned
+into a library&hellip;
+</p>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Defining Web Element Locators</h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> The Catalog</h3>
+<div class="outline-text-3" id="text-2-1">
+
+<p>Creating tests within <code>iwtf</code> begins with defining element locators on
+the web pages under test.
+</p>
+<p>
+The utility for exploring a web page and constructing element locators
+for <a href="#Selenium">Selenium</a> use is called the <code>catalog</code>. You can use the <code>catalog</code> to
+define element locators before you write tests. And you can use it
+when you're updating a locator for a test that would otherwise fail.
+</p>
+<p>
+Without <code>catalog</code>, you would poke around web pages with Firebug and
+then write test code. Or you would use <a href="#Selenium">Selenium</a> IDE and the locators
+would all be hard-coded in the recording (vs being named variables
+with values that are easier to maintain and reuse).
+</p>
+<p>
+The <code>catalog</code> saves labor and time spent on human error (like fixing
+typos). It does the work of writing code for you. You won't really
+have to know how a locator is expressed in Clojure &ndash; you can just see
+the format from the tool's output when it prints it out. You only need
+to know enough to express a query that matches some family of html
+elements (a query like <code>{:tag "input"}</code>).
+</p>
+<p>
+And in the use case of fixing a locator on the fly while a test is
+running, you won't even have to hand-edit the file where locators are
+defined. (The tool finds the file and edits it for you, and redefines
+the variable for the tests as well so when you resume, tests pass.)
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Usage</h3>
+<div class="outline-text-3" id="text-2-2">
+
+
+<p>
+We have a <code>catalog</code> (a dialog) that is launched with an element locator
+query. An example query is <code>{:tag "input"}</code> which matches "all input
+elements on the current page". 
+</p>
+<p>
+It displays a list of widgets for each matching element. The widgets
+allow you to interact with the elements and define locators for them.
+Here's what it looks like:
+</p>
+<p>
+<img src="img/catalog.png"  alt="img/catalog.png" />
+</p>
+<p>
+Each row corresponds to a single matching element on the current page.
+Each row has three buttons, a text field, and some text in a label.
+</p>
+<p>
+The button labeled <code>c</code> causes the matching element to be clicked.
+</p>
+<p>
+Normally you won't have to use this button, because the next button
+labeled <code>d</code> causes the matching element to flash different colors for
+a second when you hover over it. Some elements like checkboxes might
+not flash colors. This is when you can use <code>c</code> to click the element so
+you know which one it is.
+</p>
+<p>
+If you click the <code>d</code> button, it pops up a second dialog box which
+allows you to define a locator for the matching element.
+</p>
+<p>
+If you define a locator, the definition appears in the read only text field. If
+you want to clear it, you can click the <code>x</code> button. 
+</p>
+<p>
+The labels to the right are a shortened form of the element name or id
+(I forget which).
+</p>
+<p>
+Here are <a name="the-steps-to-follow-to-use-the-catalog" class="target">the steps to follow to use the catalog</a> . (If this seems
+like a lot of detail, it's because I was trying to communicate this to
+an offshore team originally.)
+</p>
+<ol>
+<li>In a REPL, in a namespace which refers to
+   <code>iwtf.web-element-shopper</code>, start a <a href="#selenium">selenium</a> controled Firefox
+   browser by typing <code>(begin)</code>. an instance of Firefox should start.
+   There should be a label in the lower right corner that says
+   WebDriver. And the Firebug plugin should also be available if it is
+   supported by your version of Firefox. (If you wanted an entirely
+   new profile you could use this instead: <code>(begin-np)</code> where <code>np</code>
+   stands for new profile. The code refers to the browser started with
+   these commands as <code>*browser*</code>. Currently it only supports a single
+   instance at a time.
+</li>
+<li>Navigate to the page you want directly in
+   the browser
+</li>
+<li>In the repl, type something like the following:
+   <code>(catalog *browser* {:type "text"} "google search" "txt")</code>
+<ol>
+<li>You are calling a function named <code>catalog</code>
+</li>
+<li>You're telling the function to use your <code>*browser*</code> instance
+</li>
+<li>You're interested in all elements where the attribute <code>type</code>
+       equals "text" (since firebug is available, that is one way to
+       figure out what to put here&hellip; you could have said other things
+       like <code>{:id "foo"}</code> for a particular element or <code>{:tag "input"}</code> for
+       all input items or <code>{:type "radio"}</code> for all radio buttons or
+       even combine things this way: <code>{:class "highlighted" :href        "/register"}</code>. See <a href="#clj-webdriver">clj-webdriver</a>.
+</li>
+<li>The next two arguments determine the beginning of the name of
+       this element locator in your code. The following describes my
+       convention; you can use some other convention if you wish. The
+       third argument is a string is where you describe the page you're on. It
+       can have either hyphens or spaces. This string becomes the
+       first part of the <b>names</b> of your element locators. In this
+       example, we want a catalog of all text fields on the Google
+       Search page. So the string here is: <code>google search</code>
+</li>
+<li>The last string is three characters that signify what kind of
+       element you're cataloging: <code>txt</code> for text fields, <code>sel</code> for
+       drop-down lists, <code>btn</code> for buttons, <code>lnk</code> for links, <code>txa</code> for text
+       areas, <code>lbl</code> for labels, etc. So with my convention and the
+       arguments in the example above, the
+       element locator's name will start with <code>google-search-txt-</code>
+</li>
+</ol>
+
+</li>
+<li>That pops up the dialog like the one pictured above. Move the
+   browser and the dialog box so you can see them at the same time.
+   Now make sure the dialog box has the focus. Move the mouse slowly
+   over all the buttons labeled <code>d</code> and see the elements flash on the
+   page in the browser. When you see one that interests you, click the
+   <code>d</code> button. If you don't see an element flash, you can try using
+   the <code>c</code> button to click the element &ndash; watch the browser when you
+   do this to see if you can tell which element it is. By the way,
+   the list of elements presented in this dialog have been filtered
+   down to the visible ones. There may be other elements that match
+   your query that are invisible.
+</li>
+<li>When this second dialog box appears, the focus should be in the
+   name field. Type the name of the locator. In this example, if you
+   type "search term" then eventually a locator named
+   <code>google-search-txt-search-term</code> will get defined. You can use
+   spaces and <code>iwtf</code> will replace it with hyphens. For more details on
+   this second dialog box, see the next section on <a href="#sec-3">Defining a Single Locator</a>. 
+</li>
+<li>When you're done with this second dialog (you click Use or Skip)
+    go back to step 4 and repeat the process for any other
+    interesting elements &ndash; hover over <code>d</code> buttons, click, make your
+    selections, click Use, repeat.
+</li>
+<li>And when there are no more interesting elements in your current
+    catalog dialog box, check to see if you have any rows you want to
+    get rid of. Use the <code>x</code> button to get rid of those.
+</li>
+<li>Now click the <code>Use</code> button. Go back to the REPL to see all the
+    locators printed out. You'll see two lists. Every time you defined
+    a locator, the system printed out the latest locator. And when you
+    clicked the final <code>Use</code> button on the catalog, it printed all the
+    ones you finally kept. This second list is the one you're
+    interested in.
+</li>
+<li>If you like what you see, find a place for it in
+    <code>src/iwtf/locators.clj</code>. Currently all
+    locators go here. To support stuff in separate files, the feature
+   that redefines elements during a failing tests would have to know
+   how to find the right file instead of just searching in <code>locators.clj</code>
+</li>
+</ol>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-shopper_usage" class="outline-2">
+<h2 id="shopper_usage"><a name="sec-3" id="sec-3"></a><span class="section-number-2">3</span> Defining a Single Locator</h2>
+<div class="outline-text-2" id="text-shopper_usage">
+
+
+<p>
+The <code>web-element-shopper</code> is a dialog box for defining a single
+locator. Below is a screenshot of the <code>shopper</code> as it is used during
+test maintenance &ndash; a test step has failed due to a bad element
+locator and the tester is attempting to redefine the element locator.
+In this use case, the name of the element locator is already known and
+should not be edited. So the text field for <code>Name in test code</code> is
+disabled. This text field contains the name that is used in the tests.
+</p>
+<p>
+<img src="img/web_element_shopper.png"  alt="img/web_element_shopper.png" />
+</p>
+<p>
+The dialog box is always associated with a single element on the
+current page in a Firefox browser. This is true when you're fixing a
+locator for a test as in the use case above and also true when you're
+shopping for elements with the <code>catalog</code> before writing tests. The
+<code>Flash original</code> button causes this element to flash on the page.
+</p>
+<p>
+The basic idea is to choose attributes to include in the new locator
+for this element using the checkboxes, such that the resulting query
+specifies the same element as the original. The <code>Flash selection</code>
+button causes the element that matches the resulting query to flash,
+so you can see for yourself whether your resulting query matches the
+original element.
+</p>
+<p>
+<a name="click-the-use-button" class="target">click the use button</a> : Once you think the query is satisfactory,
+the <code>Use</code> button will check to see that your query matches the
+original and if it does, it generates the locator definition. (The
+<code>Use</code> button refuses to close the dialog box if your query does not
+match the original element, so if you exit the dialog with a locator,
+you can be assured that it works.)
+</p>
+<p>
+The <code>Skip</code> button dismisses the dialog box and avoids generating the
+locator definition.
+</p>
+<p>
+When the dialog box first appears, the attributes that start off
+selected are those attributes which are capable of identifying the
+correct element without being combined with another attribute. For
+example, in the screenshot above, four attributes are selected: id,
+name, xpath, type. Each one <i>by itself</i> would constitute a sufficient
+query to match the correct element.
+</p>
+<p>
+When I use this dialog, I usually do the following:
+</p><ol>
+<li>make sure name field has the name I want
+</li>
+<li>uncheck all but one of these (usually <code>id</code>)
+</li>
+<li>and then <a href="#click-the-use-button">click the use button</a>
+</li>
+</ol>
+
+
+<p>
+By the way, the name field trims all leading and trailing whitespace,
+and then converts all spaces to hyphens. This means you can type
+normally using spaces (example: "product description") and it will get
+turned into a proper name within our system: <code>product-description</code>. 
+</p>
+<p>
+And as mentioned before, if you supply a common prefix (to indicate
+the page that the elements are from) and type prefix (like "txt" for
+text fields, etc), that is included automatically as well (e.g. all
+you have to type is "product description" and it becomes
+<code>my-site-txa-product-description</code>). This is done by
+<a href="#web-element-shopper-construct-name">web-element-shopper/construct-name</a> which you will see later.
+</p>
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Naming Conventions for Web Element Locators</h3>
+<div class="outline-text-3" id="text-3-1">
+
+<p>Here's a convention I use for a part of a web element locator name:
+</p><ul>
+<li><code>txt</code> for text fields
+</li>
+<li><code>txa</code> for multi-line text areas
+</li>
+<li><code>lbl</code> for labels or plain text on the page
+</li>
+<li><code>btn</code> for buttons
+</li>
+<li><code>sel</code> for drop-down lists
+</li>
+<li><code>opt</code> for options in drop-down lists
+</li>
+</ul>
+
+
+<p>
+If you know your initial query matches the one element you want, you
+can call <a href="#web-element-shopper-shop">web-element-shopper/shop</a> directly.
+</p>
+<p>
+If you want an entire catalog of all matching elements for your query,
+you can call <a href="#web-element-shopper-catalog">web-element-shopper/catalog</a> directly.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> <span class="target">Usage: When Preparing to Write New Tests</span></h3>
+<div class="outline-text-3" id="text-3-2">
+
+<p><a name="example-shopper-usage" class="target">example shopper usage</a> : if you want to define locators for all
+<code>input</code> elements on the current page, see <a href="#the-steps-to-follow-to-use-the-catalog">the steps to follow to use the catalog</a>.
+</p>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Notes About Locators</h3>
+<div class="outline-text-3" id="text-3-3">
+
+
+<p>
+Currently all locators are defined in <code>locators.clj</code>
+</p>
+<p>
+Code currently assumes that a locator is defined <i>on a single line</i> like
+this:
+</p>
+
+
+
+<pre class="example">(def google-lnk-advertising-programs {:text "Advertising Programs"})
+</pre>
+
+
+<p>
+And not like this:
+</p>
+
+
+
+<pre class="example">(def google-lnk-advertising-programs
+     {:text "Advertising Programs"})
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Defining Tests</h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+Optional: edit <code>locators.clj</code> after using the <code>catalog</code>
+to put in comments for groups of locators.
+</p>
+<p>
+Create a file in <code>test/iwtf/</code> to hold your test cases. You can take
+<code>core_test.clj</code> as a model.
+</p>
+<p>
+Here's the namespace declaration for an example test file.
+</p>
+
+
+
+<pre class="example">(ns iwtf.test-core
+  (:use clojure.test
+        iwtf.config
+        iwtf.locators
+        iwtf.web
+        iwtf.web-common
+        iwtf.web-element-shopper
+        iwtf.web-test)
+  (:require [clj-webdriver.core :as wd]))
+</pre>
+
+
+<p>
+Here are the fixtures to include for a test suite / namespace where a
+single browser is shared among all tests, and cookies are deleted
+after each test (see implementation <a href="#sec-4-1">here)</a>. There are also fixtures for
+handling changes in the run mode: skip remaining steps in the current
+test, skip remaining tests in current namespace, abort all, etc (see
+implementation at <a href="#web-fixture-ns">web/fixture-ns</a> and <a href="#web-fixture-test">web/fixture-test</a>).
+</p>
+
+
+
+<pre class="example">(use-fixtures :once
+              fixture-ns ;; handles run mode
+              fixture-new-browser) ;; shared browser
+
+(use-fixtures :each
+              fixture-test ;; handles run mode
+              fixture-delete-all-cookies)
+</pre>
+
+
+<p>
+Here's an example test, declared with <code>deftest</code> from <code>clojure.test</code>.
+</p>
+<p>
+Note the use of macro <code>lt</code> instead of <code>let</code>. This macro is an
+adaptation of <code>let</code>. Bindings happen normally. But if a test step
+fails and the user changes the run mode, the <code>lt</code> skips the remaining
+statements and returns whatever the body of the <code>lt</code> states. 
+</p>
+<p>
+In the example below, there is no body for <code>lt</code> so it returns <code>nil</code>.
+</p>
+<p>
+Another thing <code>lt</code> does is wrap every value part of a binding pair in
+a macro that expands out to code which tries the expression and
+prompts the user if there is an exception. This is the interactive
+part of <code>iwtf</code>.
+</p>
+<p>
+For the interactivity and the run mode options to work, code has to be
+within the value part of binding pairs in <code>lt</code>.
+</p>
+<p>
+(I tried combining the state and maybe monads but then realized that
+stack traces became a useless repetition of <code>m-bind</code> and <code>m-result</code>)
+</p>
+
+
+
+<pre class="example">(deftest google-search
+  (lt [_ (go :url "http://google.com")
+       _ (enter google-home-txt-search-term "search")
+       _ (wait-until-visible? google-home-btn-google-search false 2)]))
+</pre>
+
+
+<p>
+You can define helper functions for common web tasks and return values
+using <code>lt</code> statements.
+</p>
+<p>
+See <a href="#sec-7">the web test API</a> for the functions you can call such as the ones
+above: <code>go enter wait-until-visible?</code>
+</p>
+
+
+
+</div>
+
+<div id="outline-container-browser_fixtures" class="outline-3">
+<h3 id="browser_fixtures"><a name="sec-4-1" id="sec-4-1"></a><span class="section-number-3">4.1</span> Test Fixture: Browser</h3>
+<div class="outline-text-3" id="text-browser_fixtures">
+
+
+<p>
+Here's how we create a new browser &ndash; in a fixture so that we can
+declare whether this happens at the beginning of every namespace or at
+the beginning of every test.
+</p>
+
+
+
+<pre class="example">(defn fixture-new-browser
+  "clojure.test fixture creates a new *browser*. if the fixture is
+  used with :each, there will be a new browser for each test in the
+  namespace. with :once, all tests in a single namespace will share
+  the same browser. note: some namespaces can use :each while others
+  use :once. if you use :once, you should also use
+  fixture-delete-all-cookies as :each."
+  [f]
+  (binding [*browser* (new-firefox-browser)]
+    (f)
+    (end)))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Test Fixture: Cookies</h3>
+<div class="outline-text-3" id="text-4-2">
+
+
+<p>
+Here's the fixture for deleting all cookies.
+</p>
+
+
+
+<pre class="example">(defn fixture-delete-all-cookies
+  "clojure.test fixture deletes all cookies from *browser* even if an
+  exception occurs during the test(s)"
+  [f]
+  (f)
+  (delete-all-cookies))
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Running Tests</h2>
+<div class="outline-text-2" id="text-5">
+
+
+<p>
+There are several ways to run your tests. Basically if you're familiar
+with <code>clojure.test</code> you can skip this.
+</p>
+<ul>
+<li>In the REPL. Example: if your tests are in a namespace called
+  <code>iwtf.foo-test</code> you can execute this: <code>(run-tests   'iwtf.foo-test)</code>. You don't even have to make sure that
+  the REPL is in the same namespace before you execute this.
+  Unfortunately the results summary is a little sparse:
+  <code>{:type :summary, :pass 0, :test 1, :error 1, :fail 0}</code>
+
+</li>
+<li>If you want to run a single test or only some of the tests in a
+  namespace, you can do this at the REPL with <a href="http://richhickey.github.com/clojure/clojure.test-api.html#clojure.test/run-all-tests">run-all-tests</a> if you
+  specify a <a href="http://clojure.org/other_functions#Other Useful Functions and Macros-Regex Support">regular expression</a> to match on test names.
+
+</li>
+<li>From within a file. You can evaluate a call to <code>run-tests</code> (the same
+  kind of call in the REPL example above) by placing your cursor after
+  the closing paren and typing <code>M-e</code>
+
+</li>
+<li>In an emacs shell. <i>Test result reporting seems best using this   method.</i> You can press <code>C-x m</code> to start or enter the shell. Make
+  sure you're in any of the project's directories. Then execute <code>lein   test iwtf.foo-test</code> to execute all the tests in the
+  namespace. Or <code>lein test iwtf.foo-test :wip</code> to execute
+  the tests marked with the <code>^:wip</code> work-in-progress metadata tag.
+  See the <code>^:wip</code> metatadata in the example test definition below.
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Configuration</h2>
+<div class="outline-text-2" id="text-6">
+
+
+</div>
+
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> Patience</h3>
+<div class="outline-text-3" id="text-6-1">
+
+<p>There is a configurable period of time where the system keeps trying
+to find an element before giving up and displaying the initial dialog
+for a failed test step. You'd also see this same pause if you retry a
+test step with a bad locator.)
+</p>
+
+
+<pre class="example">(def fudge-secs 2)
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> Debug Printlns</h3>
+<div class="outline-text-3" id="text-6-2">
+
+<p>Sometimes we want to turn debugging printlns on. If <code>true</code> printlns
+will happen wherever you use <code>info</code>.
+</p>
+
+
+<pre class="example">(def debug true)
+
+(defmacro info [&amp; args] `(if debug (println ~@args)))
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-web_api" class="outline-2">
+<h2 id="web_api"><a name="sec-7" id="sec-7"></a><span class="section-number-2">7</span> Test Framework API (and Implementation)</h2>
+<div class="outline-text-2" id="text-web_api">
+
+
+</div>
+
+<div id="outline-container-7-1" class="outline-5">
+<h5 id="sec-7-1"><span class="section-number-5">7.1</span> go (to a URL)</h5>
+<div class="outline-text-5" id="text-7-1">
+
+
+<p>
+The first thing a test case might want to do is go to a particular
+URL. Example:
+</p>
+
+
+
+<pre class="example">(go :url "http://google.com" :delete-cookies false)
+</pre>
+
+
+<p>
+This uses keyword arguments so you can specify them in either order.
+</p>
+<p>
+<code>:delete-cookies</code> defaults to true.
+</p>
+<p>
+You should probably specify the fully qualified domain name if that's
+what your cookies are stored under. That way when you get to your
+site, it will use your cookies.
+</p>
+
+
+
+<pre class="example">(defn go
+  "tells the browser to go to the specified :url.
+  :delete-cookies defaults to true."
+  [&amp; {:keys [url delete-cookies]
+      :or {delete-cookies true}}]
+  (if delete-cookies (delete-all-cookies))
+  (wd/get-url *browser* url))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-2" class="outline-5">
+<h5 id="sec-7-2"><span class="section-number-5">7.2</span> enter (typing text in a field)</h5>
+<div class="outline-text-5" id="text-7-2">
+
+
+<p>
+Example of entering text in a text field:
+</p>
+
+
+
+<pre class="example">(enter my-site-txt-email-address "fake@email.com")
+</pre>
+
+
+<ol>
+<li>The first argument is the name of an element locator from
+   <code>locators.clj</code>. Technically you could use a literal locator like
+   <code>{:id "Email"}</code> but there is no need to do that if you're using the
+   <a href="#sec-3">shopper</a>.
+</li>
+<li>The second argument is the text to type.
+</li>
+</ol>
+
+
+<p>
+Note: this method does not clear any existing value from the field
+before typing.
+</p>
+<p>
+Here's the implementation of <a name="web-enter" class="target">web/enter</a> 
+</p>
+
+
+
+<pre class="example">(defmacro enter
+  "enters text in the specified field. does not clear the field first."
+  [attributes value]
+  `(web ~attributes wd/input-text ~value))
+</pre>
+
+
+<p>
+It passes the locator, the action, and the value to another macro
+<code>web</code>. The system tries the test step and if the locator is bad, gives
+the user a chance to redefine the locator and try the step again. The
+implementation of all this is explained ____ later.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7-3" class="outline-5">
+<h5 id="sec-7-3"><span class="section-number-5">7.3</span> clear</h5>
+<div class="outline-text-5" id="text-7-3">
+
+
+<p>
+Example of clearing the text from a text field or text area:
+</p>
+
+
+
+<pre class="example">(clear my-site-txt-password)
+</pre>
+
+
+<p>
+Implementation of <a name="web-clear" class="target">web/clear</a> 
+</p>
+
+
+
+<pre class="example">(defmacro clear
+  "clears a field"
+  [attributes]
+  `(web ~attributes wd/clear))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-4" class="outline-5">
+<h5 id="sec-7-4"><span class="section-number-5">7.4</span> pickt (selecting from drop-down list by text)</h5>
+<div class="outline-text-5" id="text-7-4">
+
+
+<p>
+Example of selecting a choice from a drop-down list by the text of the
+option:
+</p>
+
+
+
+<pre class="example">(pickt my-site-sel-state "California")
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+<li>The text of the option to select.
+</li>
+</ol>
+
+
+<p>
+Implementation of <a name="web-pickt" class="target">web/pickt</a> 
+</p>
+
+
+
+<pre class="example">(defmacro pickt
+  "finds a drop-down list ddl by 'attributes' and then picks the option matching the text"
+  [attributes text]
+  `(web ~attributes wd/select-by-text ~text))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-5" class="outline-5">
+<h5 id="sec-7-5"><span class="section-number-5">7.5</span> pickv (selecting from drop-down list by value)</h5>
+<div class="outline-text-5" id="text-7-5">
+
+
+<p>
+Example of selecting a choice from a drop-down list by the value of the
+option:
+</p>
+
+
+
+<pre class="example">(pickv my-site-sel-state "0")
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+<li>The value of the option to select. You can get the value by
+   looking at the option inside the select element in Firebug.
+</li>
+</ol>
+
+
+<p>
+Implementation of <a name="web-pickv" class="target">web/pickv</a> 
+</p>
+
+
+
+<pre class="example">(defmacro pickv
+  "finds a drop-down list ddl by 'attributes' and then picks the option matching the value"
+  [attributes value]
+  `(web ~attributes wd/select-by-value ~value))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-6" class="outline-5">
+<h5 id="sec-7-6"><span class="section-number-5">7.6</span> selected? (selecting from drop-down list by value)</h5>
+<div class="outline-text-5" id="text-7-6">
+
+
+<p>
+Example of testing whether an element is selected
+</p>
+
+
+
+<pre class="example">(selected? my-site-opt-state)
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+</ol>
+
+
+<p>
+Implementation of <a name="web-selected" class="target">web/selected</a> 
+</p>
+
+
+
+<pre class="example">(defmacro selected?
+  "returns whether the element is selected"
+  [attributes]
+  `(web ~attributes wd/selected?))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-7" class="outline-5">
+<h5 id="sec-7-7"><span class="section-number-5">7.7</span> check (checkbox)</h5>
+<div class="outline-text-5" id="text-7-7">
+
+
+
+
+
+<pre class="example">(check my-site-btn-accept-terms-of-use true)
+</pre>
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+<li>Whether to leave the checkbox checked or unchecked.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-check" class="target">web/check</a> checks the box and then
+if the second argument was false, toggles it unchecked.
+</p>
+
+
+
+<pre class="example">(defmacro check
+  "leaves the specified checkbox in the state 'leave-checked'"
+  [attributes leave-checked]
+  `(do (web ~attributes wd/select)
+       (if (not ~leave-checked)
+         (web ~attributes wd/toggle))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-8" class="outline-5">
+<h5 id="sec-7-8"><span class="section-number-5">7.8</span> click</h5>
+<div class="outline-text-5" id="text-7-8">
+
+
+
+
+
+<pre class="example">(click my-site-btn-submit-form)
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-click" class="target">web/click</a> 
+</p>
+
+
+
+<pre class="example">(defmacro click [attributes] `(web ~attributes wd/click))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-9" class="outline-5">
+<h5 id="sec-7-9"><span class="section-number-5">7.9</span> wait for an element to be visible</h5>
+<div class="outline-text-5" id="text-7-9">
+
+
+<p>
+Here's how you can wait 120 seconds for a particular element to be visible:
+</p>
+
+
+
+<pre class="example">(wait-until-visible my-site-btn-accept-terms-of-use 120)
+</pre>
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+<li>How long to wait before throwing an exception. In our framework,
+   the exception is caught and the user is prompted in case the
+   locator needs to be redefined.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-wait-until-visible" class="target">web/wait-until-visible</a> 
+</p>
+
+
+
+<pre class="example"> ;; this has to be public because of the macro that calls it.
+(defn assert-visible?
+  "throws an exception if element is visible/not-visible as expected. returns true otherwise."
+  [element expected]
+  (if (= expected (wd/visible? element))
+    true
+    (-&gt; (format "expected %s to be %s visible but it was otherwise" element expected)
+        Exception. throw)))
+
+(defmacro wait-until-visible?
+  [attributes expected timeout-secs]
+  `(web ~attributes assert-visible? ~expected ~timeout-secs))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-10" class="outline-5">
+<h5 id="sec-7-10"><span class="section-number-5">7.10</span> getting the text of an element</h5>
+<div class="outline-text-5" id="text-7-10">
+
+
+
+
+
+<pre class="example">(text my-site-txt-field)
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-text" class="target">web/text</a> 
+</p>
+
+
+
+<pre class="example">(defmacro text [attributes] `(web ~attributes wd/text))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-11" class="outline-5">
+<h5 id="sec-7-11"><span class="section-number-5">7.11</span> getting the value of an element</h5>
+<div class="outline-text-5" id="text-7-11">
+
+
+
+
+
+<pre class="example">(value my-site-txt-field)
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-value" class="target">web/value</a> 
+</p>
+
+
+
+<pre class="example">(defmacro value [attributes] `(web ~attributes wd/value))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-12" class="outline-5">
+<h5 id="sec-7-12"><span class="section-number-5">7.12</span> getting the class of an element</h5>
+<div class="outline-text-5" id="text-7-12">
+
+
+
+
+
+<pre class="example">(get-class my-site-txt-field)
+</pre>
+
+
+<p>
+Arguments:
+</p><ol>
+<li>The element locator for the checkbox.
+</li>
+</ol>
+
+
+<p>
+The implementation of <a name="web-get-class" class="target">web/get-class</a> 
+</p>
+
+
+
+<pre class="example">(defmacro get-class [attributes]
+  `(web ~attributes (fn [e#] (wd/attribute e# "class"))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-13" class="outline-5">
+<h5 id="sec-7-13"><span class="section-number-5">7.13</span> testing if an element is present</h5>
+<div class="outline-text-5" id="text-7-13">
+
+<p>The following is just a convenience method. It means we type less code
+to do the same thing.
+</p>
+
+
+
+<pre class="example">(present? ma-aw-f-loans-lnk-0-confirmation-id)
+</pre>
+
+
+<p>
+Implementation:
+</p>
+
+
+
+<pre class="example">(defn present?
+  "returns true if element is present"
+  [locator]
+  (-&gt;&gt; locator
+       (wd/find-element *browser*)
+       wd/present?))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-14" class="outline-5">
+<h5 id="sec-7-14"><span class="section-number-5">7.14</span> waiting for a condition to be true</h5>
+<div class="outline-text-5" id="text-7-14">
+
+<p>Sometimes you expect something to be true within a certain timeframe.
+If it fails to become true fast enough you want the test step to fail.
+An example is if you're searching for a fulfillment instance in the
+admin portal and after clicking Refresh Page, you need to wait for the
+searh results to refresh.
+</p>
+
+
+
+<pre class="example">(wait-for-condition
+ (fn [] (= (:id a) (text ma-aw-f-loans-lnk-0-confirmation-id)))
+ 5
+ 100)
+</pre>
+
+
+<p>  
+Arguments:
+</p><ol>
+<li>your condition: a function that, when executed returns true or
+   false
+</li>
+<li>the number of seconds you want to wait for this condition to become
+   true
+</li>
+<li>the number of milliseconds between attempts to test your condition
+</li>
+</ol>
+
+
+<p>  
+The implementation of <a name="web-wait-for-condition" class="target">web/wait-for-condition</a> 
+</p>
+
+
+
+<pre class="example">(defn wait-for-condition
+  "waits for f to return true or for timeout-secs to expire, polling
+   every poll-msecs. returns true if f became true before timeout-secs
+   expired. returns false if the timeout-secs expired."
+  [f timeout-secs poll-msecs]
+  (-&gt; (loop [t 0]
+        (cond (f) true
+              (&gt; (/ t 1000) timeout-secs) false
+              :else (do (. Thread (sleep poll-msecs))
+                        (recur (+ t poll-msecs)))))
+      is))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-7-15" class="outline-5">
+<h5 id="sec-7-15"><span class="section-number-5">7.15</span> exiting iframes, selecting the root document</h5>
+<div class="outline-text-5" id="text-7-15">
+
+
+<p>
+If you are in an iframe (or just think you might be in one) such as
+the canvas iframe for an app on Facebook, and you want to
+select the outermost document instead (in order to click on other tabs
+or sign out etc) then use this.
+</p>
+
+
+
+<pre class="example">(exit-iframe-select-root)
+</pre>
+
+<p>
+Arguments: none
+</p>
+<p>
+The implementation of <a name="web-exit-iframe-select-root" class="target">web/exit-iframe-select-root</a> 
+</p>
+
+
+
+<pre class="example">(defn exit-iframe-select-root
+  "moves focus to the outermost root document. use this if you're in
+  an iframe (or if you think you might be) such as the fulfillment
+  iframe in ma sw"
+  []
+  (wd/switch-to-default *browser*))
+</pre>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-when_a_step_fails" class="outline-2">
+<h2 id="when_a_step_fails"><a name="sec-8" id="sec-8"></a><span class="section-number-2">8</span> When a Test Step Fails (Implementation)</h2>
+<div class="outline-text-2" id="text-when_a_step_fails">
+
+
+</div>
+
+<div id="outline-container-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> Test Steps Wrapped in Retries</h3>
+<div class="outline-text-3" id="text-8-1">
+
+<p>You may have noticed that a lot of the API functions have
+implementations similar to this: <code>(web locator action value)</code>
+</p>
+<p>
+The implementations are similar because they're all hand-offs: we are
+handing information about what we want to the system which will try to
+find the target element and, if that fails, the system prompts the
+user to redefine the locator before trying again.
+</p>
+<p>
+The first part of the hand-off is where we make sure we have both the
+values for arguments as well as the names that were used for each
+argument. Here's <a name="web-web" class="target">web/web</a> . There are 3 versions, making the value
+and the timeout optional arguments. (todo: see if Clojure's optional
+arguments can be used here in a macro) 
+</p>
+
+
+
+<pre class="example">(defmacro web
+
+  ([locator action]
+     ;;`(web- '~locator ~locator '~action ~action :insignificant :insignificant)
+     `(web ~locator ~action :insignificant))
+
+  ([locator action value]
+     ;;`(web- '~locator ~locator '~action ~action '~value ~value)
+     `(web ~locator ~action ~value fudge-secs))
+
+  ([locator action value timeout-secs]
+     `(web- '~locator ~locator '~action ~action '~value ~value ~timeout-secs)))
+</pre>
+
+
+<p>
+Then we try to find the element and perform the action against it. If
+we can't find it we prompt the user for whether we should retry (after
+the user redefines the locator), fail the test step, or fail the
+entire test (abort). <a name="web-web-helper" class="target">web/web-helper</a> 
+</p>
+<p>
+Note: This has to be publicly available because the macros expand to
+expose calls to this.
+</p>
+
+
+
+<pre class="example">(defn web-
+  [locator-s locator action-s action value-s value timeout-secs]
+  (if (nil? value)
+    :skip
+    (let [fstr "Could not find element %s at %s and user chose to fail %s"
+          fail (fn [response new-mode]
+                 (set-mode new-mode)
+                 (-&gt;&gt; (format fstr locator-s locator response)
+                      (is false)))]
+      (loop [finding (forgiving-find locator timeout-secs)]
+        (if (no-match finding)
+          (case (prompt locator-s locator action-s action value-s value (Exception.) *browser*)
+            :retry     (recur (forgiving-find (eval (read-string (str "iwtf.locators/" locator-s))) timeout-secs))
+            :fail-step (fail "this step" :run)
+            :fail-test (fail "this test" :skip-test)
+            :fail-ns   (fail "this namespace" :skip-ns)
+            :abort     (fail "all remaining tests (abort)" :abort))
+          ;; at this point we found the element
+          (if (= value :insignificant)
+            (apply action [finding])
+            (apply action [finding value])))))))
+</pre>
+
+
+<p>
+When we attempt to find an element, we try repeatedly for a while
+before deciding it's really not there. I call it <a name="web-forgiving-find" class="target">web/forgiving-find</a> .
+It waits for an expected element for  <code>config.fudge-secs</code> before
+throwing an exception.
+</p>
+
+
+
+<pre class="example">(defn- forgiving-find
+  [a timeout-s]
+  (let [o (wd/find-element *browser* a)]
+    (if (no-match o)
+      (let [deadline (-&gt; timeout-s time/secs time/from-now)]
+        (loop [p (wd/find-element *browser* a)]
+          (if (no-match p)
+            (if (time/after? (time/now) deadline)
+              webdriver-nil
+              (recur (wd/find-element *browser* a)))
+            p)))
+      o)))
+</pre>
+
+
+<p>
+<a name="web-no-match" class="target">web/no-match</a> returns true if we get the canonical nil web
+element from <a href="#clj-webdriver">clj-webdriver</a> that signifies no match:
+</p>
+
+
+
+<pre class="example">(defn no-match [finding] (= finding webdriver-nil) )
+</pre>
+
+
+<p>
+And here's our nickname for that canonical nil web element:
+</p>
+
+
+
+<pre class="example">(def webdriver-nil #clj_webdriver.element.Element{:webelement nil})
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> Retry vs Other Options</h3>
+<div class="outline-text-3" id="text-8-2">
+
+<p>As you saw above in <a href="#web-web-helper">web/web-helper</a> if there is no match for our
+locator, we prompt the user and get back one of the responses below
+which can have an effect on our governing test framework mode (<a href="#web-mode">web/mode</a>)
+</p><ul>
+<li><b>Retry</b>
+<ul>
+<li>Leaves <code>mode</code> unchanged as <code>:run</code>
+</li>
+</ul>
+
+</li>
+<li><b>Fail Step</b> but continue with test 
+<ul>
+<li>Leaves <code>mode</code> unchanged as <code>:run</code> 
+</li>
+<li>We assert <code>is false</code> so that <code>clojure.test</code> counts it as a failed
+    step 
+</li>
+</ul>
+
+</li>
+<li><b>Fail Test</b> but continue with tests in namespace
+<ul>
+<li>Changes <code>mode</code> from <code>:run</code> to <code>:skip-test</code>
+</li>
+<li>Every test step is wrapped with a check that skips the step if
+    <code>mode</code> is not <code>:run</code>. That wrapper is put in place by <code>lt</code>. The name is
+    similar to <code>let</code> because it is basically a clojure <code>let</code> statement
+    with a wrapper added for the computation of each binding. 
+</li>
+<li>There is a fixture that is executed after each test that resets
+    <code>mode</code> to <code>:run</code> if the value is <code>:skip-test</code>. That way any
+    subsequent test in the same namespace sees <code>:run</code>. This is called
+    <code>fixture-test</code>. 
+</li>
+</ul>
+
+</li>
+<li><b>Fail Namespace</b> but continue with any other namespaces
+<ul>
+<li>Changes <code>mode</code> from <code>:run</code> to <code>:skip-ns</code>
+</li>
+<li>The wrapper for every test step mentioned above (<code>lt</code>) handles
+    skipping the rest of the test steps in the current test 
+</li>
+<li>There is a fixture that is executed before each test that skips
+    the test if <code>mode</code> says <code>:skip-test</code> or <code>:skip-ns</code> or <code>:abort</code>. This functionality
+    is actually in the same fixture as <code>fixture-test</code>
+</li>
+<li>There is another fixture that is executed after each namespace
+    that restores <code>mode</code> to <code>:run</code> if it is <code>:skip=ns</code>. That way any
+    subsequent namespace sees <code>:run</code>. This is <code>fixture-ns</code>
+</li>
+</ul>
+
+</li>
+<li><b>Abort All</b>
+<ul>
+<li>Changes <code>mode</code> to <code>:abort</code>
+</li>
+<li>The wrapper for every test step mentioned above <code>lt</code> handles
+    skipping the rest of the test steps in the current test 
+</li>
+<li><code>fixture-test</code> skips all subsequent tests in the same namespace
+</li>
+<li><code>fixture-ns</code> skips all subsequent namespaces
+</li>
+<li>For later test runs, re-compilation will reset the <code>mode</code> back to
+    <code>:run</code>. It is possible to execute tests without recompilation so
+    you'd have to remember to reset <code>mode</code> directly yourself in these cases. 
+</li>
+</ul>
+
+</li>
+</ul>
+
+
+<p>
+Currently we don't support running tests in parallel so whenever I
+want to change the mode, I can do so without regard to any race
+conditions.
+</p>
+<p>
+Here's the <code>mode</code> for our test framework <a name="web-mode" class="target">web/mode</a> 
+</p>
+
+
+
+<pre class="example">(def mode (atom :run))
+
+(defn set-mode [new-mode]
+  (swap! mode (fn [old new] new) new-mode))
+</pre>
+
+
+<p>
+Here's <a name="web-lt" class="target">web/lt</a> where we wrap every test step to check the mode
+and skip accordingly.
+</p>
+
+
+
+<pre class="example">(defmacro lt
+  "like clojure's let form but each binding and the return form might
+  be skipped if the mode dictates. this assumes the mode goes from
+  :run to something else up to once inside the eventual let and
+  doesn't switch back until after we exit the let."
+  ([bindings form]
+     (loop [b2 []
+            bs bindings]
+       (if (empty? bs)
+         `(let ~b2 (if (= :run (deref mode)) ~form nil))
+         (recur (conj b2 (nth bs 0) `(if (= :run (deref mode)) ~(nth bs 1) nil))
+                (drop 2 bs)))))
+  ([bindings]
+     (loop [b2 []
+            bs bindings]
+       (if (empty? bs)
+         `(let ~b2)
+         (recur (conj b2 (nth bs 0) `(if (= :run (deref mode)) ~(nth bs 1) nil))
+                (drop 2 bs))))))
+</pre>
+
+
+<p>
+Here's <a name="web-fixture-test" class="target">web/fixture-test</a> where we can skip a test and where we
+restore from <code>:skip-test</code>
+</p>
+
+
+<pre class="example">(defn fixture-test
+  "skips the current test if indicated by mode. restores mode if only skipping one test."
+  [f]
+  (let [m (deref mode)]
+    (condp = m
+      :run       (do (f) (if (= :skip-test (deref mode)) (set-mode :run)))
+      :skip-test (do (println "didn't expect :skip-test! restoring to :run") (set-mode :run) (f))
+      :skip-ns   (println "skipped test because of :skip-ns")
+      :abort     (println "skipped test because of :abort"))))
+</pre>
+
+
+<p>
+Here's <a name="web-fixture-ns" class="target">web/fixture-ns</a> where we can skip a namespace and where we
+restore from <code>:skip-ns</code>
+</p>
+
+
+<pre class="example">(defn fixture-ns
+  "skips the current ns if indicated by mode. restores mode if only skipping one namespace."
+  [f]
+  (let [m (deref mode)]
+    (condp = m
+      :run       (do (f) (if (= :skip-ns (deref mode)) (set-mode :run)))
+      :skip-test (do (println "didn't expect :skip-test! restoring to :run") (set-mode :run) (f))
+      :skip-ns   (do (println "didn't expect :skip-ns! restoring to :run")   (set-mode :run) (f))
+      :abort     (println "skipped namespace because of :abort"))))  
+</pre>
+
+
+<p>
+Here's <a name="web-prompt" class="target">web/prompt</a> where we get the user's response. It's long
+but not tricky. See the notes after the snippet.
+</p>
+
+
+
+<pre class="example">(defn- prompt [locator-s locator action-s action value-s value exception browser]
+  (let [btn ui/action, wrap "wrap", blank [" " wrap], r ui/return-from-dialog
+        wide "span, grow" single "grow"
+        m1    (format "Couldn't find  %s  at  %s" locator-s locator)
+        m2    (format "Was trying to  %s  with value  [%s]" action-s value)
+        stac  (btn :name "View Stack Trace" :mnemonic \s
+                   :handler (fn [_] (show-stack exception)))
+        sta2  (btn :name "View Expanded Trace" :mnemonic \v
+                   :handler (fn [_] (show-stack2 exception)))
+        cust  (ui/text :text (pr-str locator) :id :custom-query
+                       :font code-font)
+        cdef  (btn :name "Catalog Possible Replacements w/ Above Query"
+                   :mnemonic \r
+                   :handler (fn [e] (make-replacement-locator browser locator-s (get-custom-query e))))
+        undo  (btn :name "Undo a redefine (restore the bad definition)"
+                   :mnemonic \u
+                   :handler (fn [_]
+                              (restore-locator-file)
+                              (redefine-locator locator-s locator)))
+        tipf  (str "&lt;html&gt;In %s, use b to refer to the browser.&lt;br&gt;"
+                   "Lib clj-webdriver.core is aliased to wd.&lt;br&gt;"
+                   "Edit or delete the example as needed.&lt;br&gt;"
+                   "Click the Evaluate button. The result or exception&lt;br&gt;"
+                   "will appear in the text area below.&lt;/html&gt;")
+        exam  "(wd/flash (wd/find-element b {:text \"Register\"}))"
+        expr  (ui/scrollable (ui/text :id :expression
+                                      :tip (format tipf "this area")
+                                      :text exam
+                                      :multi-line? true
+                                      :font code-font))
+        evex  (btn :name "Evaluate Expression" :mnemonic \e
+                   :tip (format tipf "the area above")
+                   :handler (fn [e] (eval-expression e browser)))
+        resu  (ui/scrollable (ui/text :id :result
+                                      :tip "This is the result or exception from evaluating the expression above."
+                                      :multi-line? true
+                                      :font code-font))
+        retry (btn :name "Yes, retry"     :mnemonic \y :handler #(r % :retry))
+        abort (btn :name "Abort!"         :mnemonic \a :handler #(r % :abort))
+        fstep (btn :name "Fail Step"      :mnemonic \s :handler #(r % :fail-step))
+        ftest (btn :name "Fail Test"      :mnemonic \t :handler #(r % :fail-test))
+        fnspa (btn :name "Fail Namespace" :mnemonic \n :handler #(r % :fail-ns))
+        items [[m1 wide]
+               [m2 wide] blank
+               [stac single][sta2 wide] blank
+               [cust wide]
+               [cdef single] [undo wide] blank
+               [expr "span, grow, hmin 100"] 
+               [evex wide]
+               [resu "span, grow, hmin 60"] blank
+               ["Should I try this test step again?" wide]]
+        dlg (ui/dialog :title "Oops"
+                       :content (mig/mig-panel :items items) 
+                       :options [retry fstep ftest fnspa abort])]
+    (-&gt; dlg ui/pack! (ui/move! :to [0,0]) ui/show!)))
+;;(do (require 'clj-webdriver.core) (binding [*ns* (the-ns 'clj-webdriver.core)] (eval 'flash)))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> Redefining Element Locators</h3>
+<div class="outline-text-3" id="text-8-3">
+
+<p>The most interesting bits involve redefining the locator. 
+The buttons for redefining the locator call
+<a href="#web-element-shopper-make-replacement-locator">web-element-shopper/make-replacement-locator</a>. So actually the
+interesting part has already been discussed.
+</p>
+<p>
+The dialog box also allows the user to undo a redefine with
+<code>restore-locator-file</code> (see <a href="#web-element-shopper-locator-file">web-element-shopper/locator-file</a>). That
+restores the file. The actual definition used within the current
+run-time is restored with a call to
+<a href="#web-element-shopper-redefine-locator">web-element-shopper/redefine-locator</a>.
+</p>
+<p>
+When the user types a custom query and clicks the second Redefine
+button, we use <a name="web-get-custom-query" class="target">web/get-custom-query</a> to get that query from the
+text field.
+</p>
+
+
+
+<pre class="example">(defn- get-field-value [event id]
+  (-&gt; event ui/to-root ui/group-by-id id ui/text))
+(defn- set-field-value [event id value]
+  (let [field (-&gt; event ui/to-root ui/group-by-id id)]
+    (ui/text! field value)))
+(defn- get-custom-query [event]
+  (-&gt; event (get-field-value :custom-query) read-string))
+(defn- eval-expression [event browser]
+  (let [user (get-field-value event :expression)
+        expr (format "(try (do %s) (catch Exception exception exception))" user)
+        resu (try (do (require '[clj-webdriver.core :as wd])
+                      ((eval (list 'fn '[b] (read-string expr))) browser))
+                  (catch Exception exception exception))]
+    (set-field-value event :result (pr-str resu))))
+</pre>
+
+
+<p>
+There's a button for <a name="View-Stack-Trace" class="target">View Stack Trace</a> which calls
+<a href="#web-show-stack">web/show-stack</a>. We use an artificial exception as a convenient
+way to get and pass around the stack trace. The exception came from
+the caller of <a href="#web-prompt">web/prompt</a> which created the exception. 
+</p>
+<p>
+Here's <a name="web-show-stack" class="target">web/show-stack</a> . It gets the stack trace from the
+exception, creates records with useful columns, removes any entries
+that are from calls to code we don't care about, and then calls
+<a href="#web-show-table">web/show-table</a>. 
+</p>
+
+
+
+<pre class="example">(defn- get-stack
+  "requires that `o' be throwable. returns a collection of maps. each
+  map is an entry in the stack trace. entries that are from the
+  following are skipped: swank, java, clojure. entries that have no
+  source file are also skipped. each map has a key-value pair for the
+  following: file, line, namespace, method."
+  [o]
+  (-&gt;&gt; (.getStackTrace o)
+       (map (fn [e]
+              (let [c (map #(.toString %) (.split (.getClassName e) "[$]"))]
+                {:File      (.getFileName   e)
+                 :Line      (.getLineNumber e)
+                 :Namespace (first  c)
+                 :Method    (second c)})))
+       (remove #(contains-any (:Namespace %) ["swank." "java." "clojure."]))
+       (remove #(contains-any (:File      %) ["NO_SOURCE_FILE"]))))
+
+(defn get-relevant-source [file line namespace method]
+  (format "\nAt %s/%s (%s:%s)\n\n%s%s\n"
+          namespace method
+          (.replace file "/home/mint/workshop/iwtf/" "")
+          line
+          (with-open [rdr (clojure.java.io/reader file)]
+            (loop [lines (line-seq rdr)
+                   result ""
+                   n 0]
+              (let [next (try (first lines) (catch Exception e false))
+                    remainder (if next (rest lines) false)]
+                (cond
+                 (and next (&lt; n line)) (let [new-result (if (.startsWith next "(def")
+                                                          (str next "\n")
+                                                          (str result next "\n"))]
+                                         (recur remainder new-result (inc n)))
+                 lines result
+                 (&gt; n line) :no-such-line))))
+          "________________________________________________________________________________"))
+
+(defn get-source [m]
+  (let [root "/home/mint/workshop/iwtf/"
+        path (if (.startsWith (:Namespace m) "iwtf.test")
+               "test/iwtf/"
+               "src/iwtf/")
+        full (str root path (:File m))]
+    (get-relevant-source full
+                         (:Line m)
+                         (:Namespace m)
+                         (:Method m))))
+
+(def code-font
+  (font/font :name (if (some #(= % "Consolas") (font/font-families))
+                     "Consolas" "Monospaced")))
+(def background "#002b36")
+(def foreground "#839496")
+
+(defn show-string
+  [title content]
+  (let [cont (ui/scrollable (ui/text :text content
+                                     :multi-line? true
+                                     :background background
+                                     :foreground foreground
+                                     :font code-font))
+        items [[cont "span, grow"]]        
+        dlg (ui/dialog :title title
+                       :content (mig/mig-panel :items items))]
+    (-&gt; dlg ui/pack! (ui/move! :to [0,0]) ui/show!)))
+
+(defn- show-stack-common
+  [o f]
+  (if (instance? Throwable o)
+    (f (get-stack o))
+    (ui/alert "Sorry. This isn't implemented yet for failures signaled via a false.")))
+
+(defn show-stack2
+  "displays the source code for stack trace entries"
+  [o]
+  (show-stack-common
+   o
+   #(-&gt;&gt; %
+         rest ;; getting rid of the wrapper source here
+         reverse ;; a more natural order for showing source
+         (map get-source)
+         (apply str)
+         (format "%s... end of expanded trace -- exception occurred here.")
+         (show-string "Expanded Stack Trace"))))
+
+(defn show-stack
+  "displays a table of stack trace entries."
+  [o]
+  (show-stack-common
+   o
+   #(-&gt;&gt; %
+         (show-table "Stack Trace" [:File :Line :Namespace :Method]))))
+</pre>
+
+
+<p>
+Here's how we show a table <a name="web-show-table" class="target">web/show-table</a> . It's just mig
+layout stuff. 
+</p>
+
+
+
+<pre class="example">(defn show-table [title column-names rows]
+   (let [t1 (ux/table-x :model [:columns column-names
+                                :rows    rows]
+                        :show-horizontal-lines? true
+                        :show-vertical-lines?   false
+                        :fills-viewport-height? true)
+         t2 (doto t1 (.setHorizontalScrollEnabled true))
+         i  [[(ui/scrollable t2) "grow"]]
+         d  (ui/dialog :title title
+                       :content (mig/mig-panel :items i :constraints ["fill"]))]
+     (-&gt; d ui/pack! (ui/move! :to [0,0]) ui/show!)))
+</pre>
+
+
+<p>
+And here's how we check to see if one of our stack trace records
+contains any string that we're not interested in:
+</p>
+
+
+
+<pre class="example">(defn contains-any [s v]
+  (if (empty? v) false
+      (or (.contains s (first v))
+          (contains-any s (rest v)))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-8-4" class="outline-3">
+<h3 id="sec-8-4"><span class="section-number-3">8.4</span> Investigating a Failure</h3>
+<div class="outline-text-3" id="text-8-4">
+
+
+<p>
+<b>This section is under construction and not implemented yet</b>
+</p>
+<p>
+When a web element cannot be found, we pop up a dialog box that
+supports these actions:
+</p><ul>
+<li>Shop for a replacement locator by opening a catalog based on an
+  arbitrary query from the user (implementation done)
+</li>
+<li>Evaluate arbitrary <a href="#clj-webdriver">clj-webdriver</a> calls (work in progress). Examples:
+<ul>
+<li>causing elements to flash
+</li>
+<li>inspecting other results as seen by <a href="#clj-webdriver">clj-webdriver</a>
+</li>
+</ul>
+
+</li>
+</ul>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Fixing Failing Tests</h2>
+<div class="outline-text-2" id="text-9">
+
+
+<p>
+The <code>iwtf</code> web test framework pauses a test if it
+cannot find a given element. This allows a test maintainer to explore
+the current page in the test browser, update the element locator
+(using the <code>catalog</code> described in the previous section), and continue
+the test (and all other tests).
+</p>
+<p>
+This enables a single pass through all tests and eliminates the need
+to manually recreate test scenarios in browsers.
+</p>
+<p>
+(Currently the test framework will always pause a test for a bad
+locator. I could add a second mode to the test framework to allow a
+tester to choose whether to pause or fail the test immediately.)
+</p>
+<p>
+When a web test is unable to find a page element, a dialog appears:
+</p>
+<p>
+<img src="img/bad_locator_dialog.png"  alt="img/bad_locator_dialog.png" />
+</p>
+<p>
+It tells you the name of the locator, its present value, the action
+it was trying to take on the element, along with any associated
+value such as the text it was trying to type. (If there was no
+associated value, <code>:insignificant</code> is used instead.)
+</p>
+<p>
+You can view the stack trace by clicking the first button. Irrelevant
+entries (such as calls to java, clojure.core or swank) are stripped out of
+the stack trace before being displayed in a separate dialog
+</p>
+<p>
+<img src="img/bad_locator_stack_trace.png"  alt="img/bad_locator_stack_trace.png" />
+</p>
+<p>
+But the following is probably much more useful: you can view the
+<a name="expanded-stack-trace" class="target">expanded stack trace</a> that includes the source code, from the
+outermost scope all the way in to the exception, in sequence, if you
+click the second button. =View <a href="#Expanded-Stack-Trace">Expanded Stack Trace</a>= opens a dialog
+that contains text like the example below. Of course it has more
+entries than what's shown in this example, starting with the outermost
+scopes such as test fixtures. It always opens scrolled to the bottom,
+displaying the innermost scope where the exception occurred. The
+source for each part of the scope starts from the line that defines
+the method being called and continues down to the line of code that
+introduces the next scope (or where the exception occurred).
+</p>
+<p>
+Here you can see all the code executed down to the test step that
+failed (entering a search term on google's page).
+</p>
+
+
+
+<pre class="example">
+At iwtf.web/fixture_ns (src/iwtf/web.clj:295)
+
+(defn fixture-ns
+  "skips the current ns if indicated by mode. restores mode if only skipping one namespace."
+  [f]
+  (let [m (deref mode)]
+    (condp = m
+      :run       (do (f) (if (= :skip-ns (deref mode)) (set-mode :run)))
+________________________________________________________________________________
+
+At iwtf.web_test/fixture_new_browser (src/iwtf/web_test.clj:68)
+
+(defn fixture-new-browser
+  "clojure.test fixture creates a new *browser*. if the fixture is
+  used with :each, there will be a new browser for each test in the
+  namespace. with :once, all tests in a single namespace will share
+  the same browser. note: some namespaces can use :each while others
+  use :once. if you use :once, you should also use
+  fixture-delete-all-cookies as :each."
+  [f]
+  (binding [*browser* (new-firefox-browser)]
+    (f)
+________________________________________________________________________________
+
+At iwtf.web/fixture_test (src/iwtf/web.clj:286)
+
+(defn fixture-test
+  "skips the current test if indicated by mode. restores mode if only skipping one test."
+  [f]
+  (let [m (deref mode)]
+    (condp = m
+      :run       (do (f) (if (= :skip-test (deref mode)) (set-mode :run)))
+________________________________________________________________________________
+
+At iwtf.web_test/fixture_delete_all_cookies (src/iwtf/web_test.clj:74)
+
+(defn fixture-delete-all-cookies
+  "clojure.test fixture deletes all cookies from *browser* even if an
+  exception occurs during the test(s)"
+  [f]
+  (f)
+________________________________________________________________________________
+
+At iwtf.test_core/fn__8955 (test/iwtf/test_core.clj:75)
+
+(deftest google-search
+  (lt [_ (go :url "http://google.com")
+       _ (enter google-home-txt-search-term "search")
+________________________________________________________________________________
+... end of expanded trace -- exception occurred here.
+</pre>
+
+
+<p>
+There's a button that allows you to attempt to find a replacement
+locator. You enter a locator query and click the button to open a
+<code>catalog</code> to shop for your replacement. In this case, the <code>catalog</code>
+will insist on exactly one locator definition unless you skip/cancel
+out. The text field for the locator query defaults to the bad value
+that caused the failure in the first place. You can see from the
+screenshot above that the value is bad because I added the character
+<code>e</code> at the beginning of the id.
+</p>
+<p>
+There's a button for undoing the most recent change. Currently only
+one level of undo is supported.
+</p>
+<p>
+There are two multi-line text areas. The first allows you to enter an
+aribrary bit of Clojure code and the second contains the results of
+evaluating that code. The default value for the first text area is an
+example bit of code that uses the <a href="#clj-webdriver">clj-webdriver</a> library to control the
+browser. So when a test is having issues, you have two ways to poke around:
+Firebug and Clojure/<a href="#clj-webdriver">clj-webdriver</a>.
+</p>
+<p>
+At the bottom there are buttons for retrying, failing a single step,
+failing the current test, failing the current namespace, or aborting all.
+</p>
+
+</div>
+
+<div id="outline-container-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> Implementation</h3>
+<div class="outline-text-3" id="text-9-1">
+
+<p>The <code>shopper</code> takes a web page element, constructs a dialog box for
+it, and &ndash; if you <a href="#click-the-use-button">click the use button</a> &ndash; the <code>shopper</code>
+constructs the new locator and optionally causes its definition to
+happen and be saved to <code>locators.clj</code>. The following explanation of
+the implementation of <code>shopper</code> is presented in this order roughly.
+</p>
+<p>
+If you don't need to know how the <code>shopper</code> is implemented, you can
+skip this entire section.
+</p>
+
+</div>
+
+<div id="outline-container-9-1-1" class="outline-4">
+<h4 id="sec-9-1-1"><span class="section-number-4">9.1.1</span> Making Attribute Checkboxes for the Dialog</h4>
+<div class="outline-text-4" id="text-9-1-1">
+
+
+</div>
+
+<div id="outline-container-9-1-1-1" class="outline-5">
+<h5 id="sec-9-1-1-1"><span class="section-number-5">9.1.1.1</span> Supported Attributes</h5>
+<div class="outline-text-5" id="text-9-1-1-1">
+
+<p>An element locator "query" in <a href="#clj-webdriver">clj-webdriver</a> is a map of
+attribute-value pairs like this: <code>{:text "google", :href "http://www.google.com"}</code>
+</p>
+<p>
+The attributes supported by <code>shopper</code> (e.g. <code>:id</code> <code>:name</code> etc) are
+listed below. <code>:xpath</code> is marked <code>:customizable</code> to allow the user to
+specify a more general xpath that still identifies the right element
+and which would hopefully survive minor updates to the page from
+developers. <a name="web-element-shopper-supported-attributes" class="target">web-element-shopper/supported-attributes</a> 
+</p>
+
+
+
+<pre class="example">(def supported-attributes [{:key :id       :mnemonic \i}
+                           {:key :name     :mnemonic \n}
+                           {:key :text     :mnemonic \t}
+                           {:key :href     :mnemonic \h}
+                           {:key :class    :mnemonic \c}
+                           {:key :xpath    :mnemonic \x :customizable true}
+                           {:key :style    :mnemonic \s}
+                           {:key :value    :mnemonic \v}
+                           {:key :visible  :mnemonic \l}
+                           {:key :hidden   :mnemonic \d}
+                           {:key :tabindex :mnemonic \b}
+                           {:key :tag      :mnemonic \g}
+                           {:key :type     :mnemonic \y}
+                           {:key :onclick  :mnemonic \k}
+                           {:key :alt      :mnemonic \a}])
+</pre>
+
+
+<p>
+Given the above fixed list of supported attributes and an element from
+a page, we can construct the checkboxes for the dialog box.
+<a href="#web-element-shopper-supported-attributes">web-element-shopper/supported-attributes</a> is a vector where each
+member item is a map. Basically we build another vector with the same
+number of maps, but now each map also contains a reference to the
+element, the checkbox widget for including the attribute in the final
+locator query, and optionally a custom field for the user to type in.
+Here's <a name="web-element-shopper-make-checkboxes" class="target">web-element-shopper/make-checkboxes</a> 
+</p>
+
+
+
+<pre class="example">(defn- make-checkboxes [element browser]
+  (-&gt;&gt; supported-attributes
+       (map (partial set-element element))
+       (map (partial set-checkbox browser))
+       (map set-custom-field)))
+</pre>
+
+
+<p>
+Setting the element and browser in the maps are both trivial operations.
+</p>
+<p>
+<a name="web-element-shopper-set-element" class="target">web-element-shopper/set-element</a> 
+</p>
+
+
+
+<pre class="example">(defn- set-element [e m] (assoc m :elem e))
+</pre>
+
+
+<p>
+<a name="web-element-shopper-set-checkbox" class="target">web-element-shopper/set-checkbox</a> 
+</p>
+
+
+
+<pre class="example">(defn- set-checkbox [browser m]
+  (assoc m :checkbox (make-checkbox m browser)))
+</pre>
+
+
+<p>
+Making the checkbox is a little more invovled. Widgets will be
+displayed using <a name="Seesaw" class="target">Seesaw</a> (<a href="https://github.com/daveray/seesaw">official site</a>) and each widget needs an
+<code>:id</code>. Usually we'll use the name of the attribute for that. Each
+checkbox needs some text as a label, and a mnemonic key for keyboard
+shortcuts. And we want each attribute which would be sufficient by
+itself in a query to start off selected when the dialog pops up.
+</p>
+
+
+
+<pre class="example">(defn- make-checkbox [m browser]
+  (ui/checkbox :id (get-label m)
+               :text (choice m)
+               :mnemonic (:mnemonic m)
+               :selected? (sufficient? (get-label m) (get-value m) (:elem m) browser)))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-1-2" class="outline-5">
+<h5 id="sec-9-1-1-2"><span class="section-number-5">9.1.1.2</span> Checkbox IDs</h5>
+<div class="outline-text-5" id="text-9-1-1-2">
+
+<p>As I mentioned before, usually we'll use the name of the attribute as
+the id of the widget. 
+</p>
+<p>
+<a name="Special-Case-for-Apostrophes" class="target">Special Case for Apostrophes</a> : when a locator relies on <code>:text</code>
+and the text of an element contains an apostrophe (like "Don't have an
+account?") it doesn't play well with the javascript that's created by
+<a href="#clj-webdriver">clj-webdriver</a> which uses single-quotes to delimit strings. So for
+texts that contain apostrophes we use xpath with double-quotes
+instead.
+</p>
+<p>
+In <a name="web-element-shopper-get-label" class="target">web-element-shopper/get-label</a> we <a href="#dispatch">dispatch</a> on <code>:key</code> and
+<code>default</code> to simply getting the attribute name from the map. And we
+add an extra multimethod for the case when <code>:key</code> is <code>:text</code> where we
+end up using <code>:xpath</code> instead if we find an apostrophe with
+<a href="#web-element-shopper-apostrophe">web-element-shopper/apostrophe</a> 
+</p>
+<p>
+(<a name="Dispatch" class="target">Dispatch</a> happens on the value that results from executing the
+function that is the second argument of <code>defmulti</code> below, applied to
+the first (I think) argument in actual calls during runtime. The
+function given in this case is <code>:key</code> and in Clojure, keywords like
+<code>:key</code> act as functions on maps. The argument to our functions are
+maps so basically we're saying we <a href="#dispatch">dispatch</a> on the value of <code>:key</code>)
+</p>
+
+
+
+<pre class="example">(defmulti  get-label :key)
+(defmethod get-label :default [m] (:key m))
+(defmethod get-label :text [m]
+  (if (apostrophe? (text (:elem m))) :xpath :text))
+</pre>
+
+
+<p>
+Here's how we check for the <a href="#special-case-for-apostrophes">special case for apostrophes</a> 
+<a name="web-element-shopper-apostrophe" class="target">web-element-shopper/apostrophe</a> 
+</p>
+
+
+
+<pre class="example">(defn- apostrophe? [t] (and (not= nil t) (.contains t "'")))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-1-3" class="outline-5">
+<h5 id="sec-9-1-1-3"><span class="section-number-5">9.1.1.3</span> Checkbox Labels</h5>
+<div class="outline-text-5" id="text-9-1-1-3">
+
+<p>The text label on the checkbox that's visible to the user looks like
+<code>id: Password</code> where the first part is the name of the attribute, then
+a colon, then the value of the attribute. <a name="web-element-shopper-choice" class="target">web-element-shopper/choice</a> 
+</p>
+
+
+
+<pre class="example">(defn- choice [m]
+  (format "%s: %s"
+          (.substring (str (get-label m)) 1)
+          (get-value m)))
+</pre>
+
+
+<p>
+To make the text label, we need to get the value for a given
+attribute. The way we get the value depends on the attribute so we
+<a href="#dispatch">dispatch</a> on <code>:key</code>
+<a name="web-element-shopper-get-value" class="target">web-element-shopper/get-value</a> 
+</p>
+
+
+
+<pre class="example">(defmulti get-value :key)
+</pre>
+
+
+<p>
+By default we just get the attribute's value:
+</p>
+
+
+<pre class="example">(defmethod get-value :default [m] (attribute (:elem m) (:key m)))
+</pre>
+
+
+<p>
+For value, xpath, and tag we have to use other <a href="#clj-webdriver">clj-webdriver</a> functions
+to get the value:
+</p>
+
+
+
+<pre class="example">(defmethod get-value :value [m] (value (:elem m)))
+(defmethod get-value :xpath [m] (xpath (:elem m)))
+(defmethod get-value :tag [m] (tag (:elem m)))
+</pre>
+
+
+<p>
+For href, I found that I have to remove the beginning part where it
+says <code>http://machine:port/</code>. If there doesn't seem to be an href
+value, I supply an empty string (probably to avoid some null pointer
+exception later).
+</p>
+<p>
+Another case that's handled here is if the href is a javascript call.
+That's in the <code>catch</code> part of the try-catch.
+</p>
+
+
+
+<pre class="example">(defmethod get-value :href [m]
+  (let [url (attribute (:elem m) :href)]
+    (if url
+      (try (.substring url (.indexOf url "/" 8))
+           (catch Exception exc url))
+      "")))
+</pre>
+
+
+<p>
+For text, I return the xpath equivalent if there is an apostrophe (See
+also: <a href="#web-element-shopper-apostrophe">web-element-shopper/apostrophe</a> and <a href="#special-case-for-apostrophes">special case for apostrophes</a>). So here's <a name="web-element-shopper-get-value-text" class="target">web-element-shopper/get-value-text</a> 
+</p>
+
+
+
+<pre class="example">(defmethod get-value :text [m]
+  (let [t (text (:elem m))]
+    (if (apostrophe? t)
+      (str "//*[text()=concat(\"" t "\",\"\")]")
+      t)))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-1-4" class="outline-5">
+<h5 id="sec-9-1-1-4"><span class="section-number-5">9.1.1.4</span> Checkbox Selected Initially</h5>
+<div class="outline-text-5" id="text-9-1-1-4">
+
+<p>Whether the checkbox starts off selected depends on whether the
+attribute would be able to identify the correct web element all by
+itself. So we have a test for whether the attribute is sufficient
+<a name="web-element-shopper-sufficient" class="target">web-element-shopper/sufficient</a> which takes 
+</p><ul>
+<li><code>k</code> the name of the attribute
+</li>
+<li><code>v</code> the value of the attribute
+</li>
+<li><code>e</code> the original target element
+</li>
+<li><code>browser</code> the browser that's being driven by <a href="#clj-webdriver">clj-webdriver</a>
+</li>
+</ul>
+
+
+<p>
+As long as the value <code>v</code> isn't <code>nil</code> we'll see if <a href="#clj-webdriver">clj-webdriver</a>
+<code>find-element</code> returns the same element.
+</p>
+
+
+
+<pre class="example">(defn- sufficient? [k v e browser]
+  (and (not (nil? v))
+       (= e (find-element browser {k v}))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-1-5" class="outline-5">
+<h5 id="sec-9-1-1-5"><span class="section-number-5">9.1.1.5</span> Custom Text Field</h5>
+<div class="outline-text-5" id="text-9-1-1-5">
+
+<p>We support editing the value of xpath (sometimes the tester (you!) can
+come up with a more general xpath that still works and that would
+survive minor edits to the web page made by developers).
+</p>
+<p>
+As you saw in <a href="#web-element-shopper-supported-attributes">web-element-shopper/supported-attributes</a> an
+attribute like xpath can be marked as customizable. Here's the bit of
+code that does something different if <code>:customizable</code> is set to
+<code>true</code> (<a name="web-element-shopper-mig" class="target">web-element-shopper/mig</a> ). All it basically does is
+include the custom field in the list of widgets.
+</p>
+
+
+
+<pre class="example">(defn- mig [m]
+  (if (:customizable m)
+    [[(:checkbox m) "wrap"] [" "] [(:custom-field m) "gapleft20, growx, wrap"] [" "]]
+    [[(:checkbox m) "wrap"] [" "]]))
+</pre>
+
+
+<p>
+So that means somewhere we had to set the custom field for it to be available.
+<a name="web-element-shopper-set-custom-field" class="target">web-element-shopper/set-custom-field</a> . As you recall, we
+call this when we make the checkboxes <a href="#web-element-shopper-make-checkboxes">web-element-shopper/make-checkboxes</a>
+</p>
+
+
+
+<pre class="example">(defn- set-custom-field [m]
+  (if (:customizable m)
+    (into m {:custom-field (make-custom-field m)})
+    m))
+</pre>
+
+
+<p>
+Making the custom field is pretty straightforward, especially since we
+have <a href="#web-element-shopper-get-value">web-element-shopper/get-value</a> <a href="#dispatch">dispatch</a> to
+<a href="#web-element-shopper-get-value-text">web-element-shopper/get-value-text</a>. 
+</p>
+
+
+
+<pre class="example">(defn- make-custom-field [m]
+  (ui/text :text (get-value m)))
+</pre>
+
+
+<p>
+When we get the value out of the custom field we should validate it
+for proper format, etc.
+<a name="web-element-shopper-validate-custom-value" class="target">web-element-shopper/validate-custom-value</a> is set up to <a href="#dispatch">dispatch</a>
+on the attribute but we only have one custom field so far. Plus, I
+haven't implemented a validator for xpaths yet (or haven't taken the
+time to find some existing Java or Clojure library that does xpath
+validation).
+</p>
+
+</div>
+
+<div id="outline-container-9-1-1-5-1" class="outline-7">
+<h7 id="sec-9-1-1-5-1"><span class="section-number-7">9.1.1.5.1</span> <span class="todo TODO">TODO</span> validate custom xpaths</h7>
+<div class="outline-text-7" id="text-9-1-1-5-1">
+
+
+
+
+
+<pre class="example">(defmulti validate-custom-value :key)
+
+(defmethod validate-custom-value :default [m]
+  {(get-label m) (ui/text (:custom-field m))})
+</pre>
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-9-1-2" class="outline-4">
+<h4 id="sec-9-1-2"><span class="section-number-4">9.1.2</span> Getting the Result: Name and Query</h4>
+<div class="outline-text-4" id="text-9-1-2">
+
+<p><a name="web-element-shopper-return-result" class="target">web-element-shopper/return-result</a> gets the resulting query
+and the name. This is the function that's called when you <a href="#click-the-use-button">click the use button</a>. 
+</p>
+<p>
+It alerts the user for these cases:
+</p><ul>
+<li>nothing is selected
+</li>
+<li>the query doesn't match the target element
+</li>
+<li>the name specified isn't valid
+</li>
+</ul>
+
+
+<p>
+In the positive case it does the following:
+</p><ul>
+<li>prints out the resulting Clojure definition
+</li>
+<li>if =edit is true
+<ul>
+<li>causes the definition to be executed 
+</li>
+<li>updates locator.clj
+</li>
+</ul>
+
+</li>
+</ul>
+
+
+<p>
+<a name="web-element-shopper-get-selected-element" class="target">web-element-shopper/get-selected-element</a> 
+</p>
+
+
+<pre class="example">(defn- get-selected-element [ms browser]
+  (if-let [atts (get-selected-attributes ms)]
+    (let [finding (find-element browser atts)
+          result  (if (no-match finding) nil finding)]
+      [result atts])
+    [nil nil]))
+</pre>
+
+
+
+<pre class="example">(defn- return-result [edit event ms page kind element browser]
+  (let [[finding atts] (get-selected-element ms browser)]
+    (if atts
+      (let [name (get-name event page kind)
+          good (= element finding)
+          msgn (if-not name (format "[%s] is not a valid name.\n" name))
+          msgl (if-not good (format "%s doesn't identify the right element."))
+          expr (format "(def %s %s)" name atts)]
+      (if (and name good)
+        (do (println expr)
+            (if edit
+              (do
+                (redefine-locator name atts)
+                (update-locator-file name expr)))
+            (ui/return-from-dialog event expr))
+        (ui/alert (str msgn msgl))))
+      (ui/alert "Nothing selected!"))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-3" class="outline-4">
+<h4 id="sec-9-1-3"><span class="section-number-4">9.1.3</span> Getting the Resulting Query</h4>
+<div class="outline-text-4" id="text-9-1-3">
+
+
+<p>
+As you can see in <a href="#web-element-shopper-validate-custom-value">web-element-shopper/validate-custom-value</a> it's
+returning an attribute-value map. That's because it's used in
+<a name="web-element-shopper-get-selection" class="target">web-element-shopper/get-selection</a> when we're getting each
+checkbox's contribution to the final <a href="#clj-webdriver">clj-webdriver</a> element locator
+query. If a checkbox is selected, we return a map. If it's for a
+customizable value, we validate it.
+</p>
+
+
+
+<pre class="example">(defn- get-selection [m]
+  (if (ui/selection (:checkbox m))
+    (if (:customizable m)
+      (validate-custom-value m)
+      {(get-label m) (get-value m)})
+    nil))
+</pre>
+
+
+<p>
+In order to get all the contributions from each checkbox, we need to
+merge the contributions into a single map. But it is possible for
+there to be two xpath contributions (if <a href="#special-case-for-apostrophes">special case for apostrophes</a>
+applies and the user selected both xpath and text). So we have to use
+<code>merge-with</code> together with <a href="#web-element-shopper-prompt">web-element-shopper/prompt</a> to ask the
+user to choose which xpath to use. Here's
+<a name="web-element-shopper-get-selected-attributes" class="target">web-element-shopper/get-selected-attributes</a> 
+</p>
+
+
+
+<pre class="example">(defn- get-selected-attributes [ms]
+  (reduce (partial merge-with prompt)
+          (map get-selection ms)))
+</pre>
+
+
+<p>
+And here's how we prompt the user with a <a href="#Seesaw">Seesaw</a> dialog box.
+<a name="web-element-shopper-prompt" class="target">web-element-shopper/prompt</a> 
+</p>
+
+
+
+<pre class="example">(defn- prompt [a b]
+  (-&gt; (ui/dialog
+       :content (mig/mig-panel
+                 :items [["Which do you want?" "wrap"]
+                         [(str "1 -- " a) "wrap"]
+                         [(str "2 -- " b) "wrap"]])
+       :resizable? false
+       :title "Choice"
+       :type :question
+       :options [(ui/action :name 1
+                            :mnemonic \1
+                            :handler #(ui/return-from-dialog % a))
+                 (ui/action :name 2
+                            :mnemonic \2
+                            :handler #(ui/return-from-dialog % b))])
+      ui/pack! ui/show!))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-4" class="outline-4">
+<h4 id="sec-9-1-4"><span class="section-number-4">9.1.4</span> Testing the Resulting Query</h4>
+<div class="outline-text-4" id="text-9-1-4">
+
+<p><a name="web-element-shopper-test-selection" class="target">web-element-shopper/test-selection</a> flashes the element
+found by the resulting query. But if nothing is selected or if the
+query doesn't match any element on the page, the user is alerted.
+</p>
+
+
+<pre class="example">(defn- test-selection [ms browser]
+  (let [[element atts] (get-selected-element ms browser)]
+    (if atts
+      (if element
+        (flash element)
+        (ui/alert (str "Your choices do not match any element on this page.\n"
+                       "Tested: " atts)))
+      (ui/alert "Nothing selected!"))))
+
+(defn- click-selection [ms browser]
+  (let [[element atts] (get-selected-element ms browser)]
+    (if atts
+      (if element
+        (click element)
+        (ui/alert (str "Your choices do not match any element on this page.\n"
+                       "Tested: " atts)))
+      (ui/alert "Nothing selected!"))))
+
+(defn- type-in-selection [ms browser]
+  (let [[element atts] (get-selected-element ms browser)]
+    (if atts
+      (if element
+        (input-text element "test-string")
+        (ui/alert (str "Your choices do not match any element on this page.\n"
+                       "Tested: " atts)))
+      (ui/alert "Nothing selected!"))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-5" class="outline-4">
+<h4 id="sec-9-1-5"><span class="section-number-4">9.1.5</span> Handling the Name</h4>
+<div class="outline-text-4" id="text-9-1-5">
+
+<p>When you <a href="#click-the-use-button">click the use button</a>, one of the things the dialog box does
+is construct the name for the locator. The event from the pressing of
+the <code>Use</code> button gives us the way to find the actual text field
+widget, and from there we call the function that actually constructs
+the name. Here's how we get the value from the text field:
+<a name="web-element-shopper-get-name" class="target">web-element-shopper/get-name</a> 
+</p>
+
+
+
+<pre class="example">(defn- get-name [event page kind]
+  (-&gt;&gt; event ui/to-root ui/group-by-id :code ui/text
+       (construct-name page kind)))
+</pre>
+
+
+<p>
+And here's where it does the work of constructing the name.
+<a name="web-element-shopper-construct-name" class="target">web-element-shopper/construct-name</a> handles page prefixes and
+suffixes (even if they're empty strings) and hyphenation: 
+</p>
+
+
+<pre class="example">(defn- construct-name-helper [t x]
+  (if (and (not (empty? x)) (not (empty? t)))
+            (str x "-")
+            x))
+
+(defn- hyphenate-spaces [s] (.replace (.trim s) " " "-"))
+
+(defn- construct-name [page kind n]
+  (let [t (hyphenate-spaces n)
+        k0 (hyphenate-spaces kind)
+        p0 (hyphenate-spaces page)
+        p (construct-name-helper t p0)
+        k (construct-name-helper t k0)]
+    (str p k t)))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-6" class="outline-4">
+<h4 id="sec-9-1-6"><span class="section-number-4">9.1.6</span> Defining the Locator</h4>
+<div class="outline-text-4" id="text-9-1-6">
+
+<p>When you <a href="#click-the-use-button">click the use button</a>, if everything is fit and proper and if
+you've elected to cause editing to happen (see <a href="#example-shopper-usage">example shopper usage</a>)
+then the <code>shopper</code> will cause the locator to be defined (using
+Clojure's <code>intern</code>) or redefined (using Clojure's <code>alter-var-root</code> to
+change the root binding of the var). <a name="web-element-shopper-redefine-locator" class="target">web-element-shopper/redefine-locator</a> 
+</p>
+
+
+<pre class="example">(defn redefine-locator [name atts]
+  (let [locator-ns (find-ns 'iwtf.locators)
+        my-symbol (symbol name)
+        existing-var (ns-resolve locator-ns my-symbol)]
+    (if existing-var
+      (alter-var-root existing-var (fn [_] atts))
+      (intern locator-ns my-symbol atts))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-7" class="outline-4">
+<h4 id="sec-9-1-7"><span class="section-number-4">9.1.7</span> Updating locators.clj</h4>
+<div class="outline-text-4" id="text-9-1-7">
+
+<p>Under the same conditions as the previous section, the <code>shopper</code> will
+also update the <code>lcoators.clj</code> file by either replacing an existing
+line or adding a line to the end of the file. We also back up the
+original file just in case we want to restore it later as part of
+undoing an edit.
+</p>
+
+
+<pre class="example">(defn- update-locator-file [name expr]
+  (copy-small-file locator-file)
+  (let [original-content (slurp locator-file)
+        pattern-str (str "\\(def\\s" name "\\s[^\\)]*\\)")
+        pattern (re-pattern pattern-str)
+        result (if (re-find pattern original-content)
+                 (s/replace-first original-content pattern expr)
+                 (str original-content "\n" expr))]
+    (spit locator-file result)))
+</pre>
+
+
+
+</div>
+
+<div id="outline-container-9-1-7-1" class="outline-5">
+<h5 id="sec-9-1-7-1"><span class="section-number-5">9.1.7.1</span> <span class="todo TODO">TODO</span> make location of locators.clj flexible</h5>
+<div class="outline-text-5" id="text-9-1-7-1">
+
+<p>The locator file is in a fixed place. And the file name extension for
+backup files is also fixed. Also here are utilities for copying a
+small file and restoring the locator file. <a name="web-element-shopper-locator-file" class="target">web-element-shopper/locator-file</a> 
+</p>
+
+
+
+<pre class="example">(def locator-file "/home/mint/workshop/iwtf/src/iwtf/locators.clj")
+
+(def bak ".bak")
+
+(defn- copy-small-file
+  ([src]      (copy-small-file src (str src bak)))
+  ([src dst]  (-&gt;&gt; (slurp src)
+                   (spit  dst))))
+
+(defn restore-locator-file []
+  (copy-small-file (str locator-file bak) locator-file))
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-9-1-8" class="outline-4">
+<h4 id="sec-9-1-8"><span class="section-number-4">9.1.8</span> Constructing the Dialog</h4>
+<div class="outline-text-4" id="text-9-1-8">
+
+<p>Here's where we make all the widgets for the dialog (except for the
+<code>Use</code> and <code>Skip</code> buttons which are automatically created as <a href="http://daveray.github.com/seesaw/seesaw.core-api.html#seesaw.core/dialog">dialog options</a>). It's basically a whole bunch of <a href="#Seesaw">Seesaw</a> and &lt;&lt;&lt;mig layout
+stuff&gt;&gt;&gt; (<a href="http://daveray.github.com/seesaw/seesaw.mig-api.html">official site</a>). <a name="web-element-shopper-make-widgets" class="target">web-element-shopper/make-widgets</a> 
+</p>
+
+
+
+<pre class="example">(defn- make-widgets [initial-name boxes browser element]
+  (let [inam (str initial-name), btn ui/action]
+    (concat
+     [["Name in test code" "align r"]
+      [(ui/text :id :code :text inam :enabled? (.equals "" inam))
+       "growx, spanx 3, wrap"]
+      ["Element" "gaptop 15, align r"]
+      [(btn :name "Flash original" :mnemonic \f
+            :handler (fn [_] (flash element))) "split 4"]
+      [(btn :name "Flash selection" :mnemonic \e
+            :handler (fn [_] (test-selection boxes browser)))]
+      [(btn :name "Click selection" :mnemonic \k
+            :handler (fn [_] (click-selection boxes browser)))]
+      [(btn :name "Type in selection" :mnemonic \y
+            :handler (fn [_] (type-in-selection boxes browser))) "wrap"]
+      ["Attributes" "gaptop 15, align r"]]
+     (reduce concat (map mig boxes)))))
+</pre>
+
+
+<p>
+<a name="web-element-shopper-open-dlg" class="target">web-element-shopper/open-dlg</a> is where we make the entire
+dialog. Again, more <a href="#Seesaw">Seesaw</a> and mig layout stuff. There's two versions
+of it which depend on the argument list. If a name isn't supplied for
+the element locator, the first version defaults it to the empty string
+and calls the second version.
+</p>
+<ul>
+<li>The first version is called when you're shopping for elements (see
+  <a href="#sec-3-2">Usage: When Preparing to Write New Tests</a>) and you'll be typing in
+  the names of locators as you walk the page of elements.
+
+</li>
+<li>The second version is called when you're fixing an existing locator
+  and the name is known.
+</li>
+</ul>
+
+
+
+
+
+<pre class="example">(defn- open-dlg
+
+  ([edit browser element page kind]
+     (open-dlg edit browser element page kind ""))
+
+  ([edit browser element page kind initial-name]
+     ;;(flash element)
+     (let [atts (make-checkboxes element browser)
+           wids (make-widgets initial-name atts browser element)
+           btn  ui/action]
+       (-&gt; (ui/dialog
+            :content (mig/mig-panel :items wids)
+            :resizable? false
+            :title "Element Locator Options"
+            :options [(btn :name "Use"
+                           :mnemonic \u
+                           :handler (fn [ev] (return-result edit ev atts page
+                                                            kind element
+                                                            browser)))
+                      (btn :name "Skip"
+                           :mnemonic \p
+                           :handler #(ui/return-from-dialog % nil))])
+           ui/pack! ui/show!))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-9-1-9" class="outline-4">
+<h4 id="sec-9-1-9"><span class="section-number-4">9.1.9</span> Entry Point for Maintaining Tests Use Case</h4>
+<div class="outline-text-4" id="text-9-1-9">
+
+<p><a name="web-element-shopper-make-replacement-locator" class="target">web-element-shopper/make-replacement-locator</a> When you're fixing
+a locator for a failing test case, you come in with either just the
+locator name or with a custom query as well.
+</p>
+<p>
+If you come in with just the name, we deduce the tag for the element
+from the name and create a query that returns all elements on the page
+with the same tag. That's the first version of the function below. It
+then calls the second version with this query.
+</p>
+<p>
+And it's the second version that gets called directly if you come in
+with your own custom query. The combination of map/remove/first is
+lazy so once you <a href="#click-the-use-button">click the use button</a> and have a locator, no further
+dialog boxes will appear to ask you about the remaining elements.
+</p>
+
+
+<pre class="example">(defn get-name-from-catalog-result
+  [r]
+  (nth (.split r " ") 1))
+
+(defn get-value-from-catalog-result
+  [r] 
+  (read-string (first (re-find #"(\{[^\}]+\})" r))))
+
+(declare catalog)
+
+(defn make-replacement-locator  
+  [browser name query]
+  (if-let [result (catalog browser query name)]
+    (let [name (get-name-from-catalog-result result)
+          valu (get-value-from-catalog-result result)]
+      (do (redefine-locator name valu)
+          (update-locator-file name result)))))
+</pre>
+
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Tips and Best Practices</h2>
+<div class="outline-text-2" id="text-10">
+
+<ul>
+<li>If you have all the tests in a single namespace share the same
+  browser and delete cookies in between tests, then any given test
+  cannot assume anything about the current page when it starts, and
+  must explicitly navigate to a known starting page. 
+</li>
+<li>Include comments at the beginning of every test to tell the test
+  maintainer what important things are being tested by the code. That
+  way (1) the functionality under test will be preserved and (2)
+  people adding tests will have an easier time knowing what is already
+  covered and what is not.
+</li>
+<li>Tests should be independent of each other, capable of passing when
+  run in any sequence (execution sequence is not guaranteed under
+  <code>clojure.test</code>) or by themselves.
+</li>
+<li>Move the <code>^:wip</code> work-in-progress marker to the test that you're
+  working on. That way you can execute that single test alone (vs all
+  the tests in that namespace) to try out your changes.
+</li>
+</ul>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-10-16 21:40:53 UTC</p>
+<p class="author">Author: Andrew Cheng</p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
